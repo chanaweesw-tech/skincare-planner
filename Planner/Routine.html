@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skincare Planner – Routine</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Noto Sans Thai", "system-ui", "sans-serif"] },
+          colors: {
+            skinPink: "#ff9ec8",
+            skinBlue: "#b4e1ff",
+            skinLav: "#d8c7ff",
+            skinBg: "#f5f4ff",
+          },
+          boxShadow: {
+            soft: "0 18px 45px rgba(15,23,42,0.14)",
+          },
+        },
+      },
+    };
+  </script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-skinBg via-white to-skinBlue/40 font-sans text-slate-900 flex items-center justify-center">
+
+  <div
+    class="max-w-5xl w-full mx-4 md:mx-8 my-6 md:my-10 rounded-[2.5rem]
+           bg-white/40 backdrop-blur-xl border border-white/50
+           shadow-[0_30px_80px_rgba(15,23,42,0.18)]"
+  >
+    <div class="px-4 md:px-8 py-6 md:py-8">
+
+      <!-- Top bar -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <button
+            onclick="window.location.href='index.html'"
+            class="w-9 h-9 rounded-2xl bg-white/80 shadow-soft flex items-center justify-center text-slate-500 hover:bg-white"
+          >
+            ←
+          </button>
+          <div>
+            <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Skincare Planner</p>
+            <h1 id="routineTitle" class="text-lg md:text-xl font-semibold">
+              Routine
+            </h1>
+          </div>
+        </div>
+
+        <div class="text-right text-xs md:text-sm">
+          <p id="dateLabel" class="text-slate-500"></p>
+          <p id="chipLabel" class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/70 shadow-soft mt-1 text-[11px] text-slate-600">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span id="chipText">Balanced night</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Main layout -->
+      <div class="grid md:grid-cols-2 gap-5 items-start">
+
+        <!-- Morning -->
+        <section class="relative rounded-3xl bg-white/95 shadow-soft p-4 md:p-6 overflow-hidden">
+          <div class="pointer-events-none absolute -right-10 -top-10 w-28 h-28 bg-gradient-to-br from-skinBlue/50 via-skinPink/40 to-skinLav/50 blur-2xl opacity-70"></div>
+
+          <div class="relative flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center">
+              <span class="text-xl">🌞</span>
+            </div>
+            <div>
+              <h2 class="text-base md:text-lg font-semibold text-slate-900">ตอนเช้า</h2>
+              <p class="text-xs text-slate-500">รูทีนเหมือนกันทุกวัน</p>
+            </div>
+          </div>
+
+          <ul id="morningList" class="relative space-y-2 mt-2 text-sm"></ul>
+
+          <p class="relative mt-3 text-[11px] text-slate-400 italic flex items-center gap-1">
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-rose-300"></span>
+            อย่าลืมกันแดดทุกเช้า ไม่งั้น active ทั้งหมดเสียของเลยน้า
+          </p>
+        </section>
+
+        <!-- Night -->
+        <section class="relative rounded-3xl bg-slate-950 text-slate-50 shadow-soft p-4 md:p-6 overflow-hidden">
+          <div class="pointer-events-none absolute -left-16 -bottom-16 w-40 h-40 bg-gradient-to-tr from-skinPink via-skinLav to-skinBlue blur-3xl opacity-80"></div>
+
+          <div class="relative flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-2xl bg-slate-900 border border-slate-700 flex items-center justify-center">
+              <span class="text-xl">🌙</span>
+            </div>
+            <div>
+              <h2 class="text-base md:text-lg font-semibold text-slate-50">ตอนกลางคืน</h2>
+              <p id="nightTitle" class="text-xs text-slate-300"></p>
+            </div>
+          </div>
+
+          <ul id="nightList" class="relative space-y-2 mt-2 text-sm"></ul>
+
+          <p class="relative mt-3 text-[11px] text-slate-400 italic flex items-start gap-1">
+            ⚠️
+            <span id="nightNote">
+              คืนที่มีเรตินอล → งด Thiamidol และของกัดผิวทั้งหมด เพื่อเซฟ barrier ผิว
+            </span>
+          </p>
+        </section>
+      </div>
+
+      <!-- ปุ่มเสร็จสิ้นรูทีน -->
+      <div class="mt-6 flex justify-end">
+        <button
+          onclick="finishRoutine()"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500 text-white text-sm font-medium shadow-soft hover:bg-emerald-600 active:translate-y-[1px] transition"
+        >
+          ✓ เสร็จสิ้นรูทีนแล้ว
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // key ของวันที่ปัจจุบันในหน้า routine (ใช้เก็บลง localStorage)
+    var routineDateKey = "";
+
+    // กดเสร็จสิ้น → เซฟลง localStorage แล้วกลับหน้า Home
+    function finishRoutine() {
+      if (!routineDateKey) {
+        window.location.href = "index.html";
+        return;
+      }
+      var stored = localStorage.getItem("skincareFinishedDays");
+      var finished = stored ? JSON.parse(stored) : {};
+      finished[routineDateKey] = true;
+      localStorage.setItem("skincareFinishedDays", JSON.stringify(finished));
+      window.location.href = "index.html";
+    }
+
+    // --- data ---
+    var morningSteps = [
+      "ล้างหน้า",
+      "LA GLADE Acne Care Daily Calming Pads",
+      "The Ordinary Niacinamide 10% + Zinc 1%",
+      "Eucerin Spotless Brightening (Thiamidol)",
+      "Eucerin UltraSENSITIVE Aquaporin Gel Cream",
+      "กันแดด SPF 30+ ขึ้นไป"
+    ];
+
+    var nightRoutines = {
+      1: {
+        label: "Day 1 – Retinol Night",
+        type: "retinol",
+        steps: [
+          "ล้างหน้า",
+          "งด Pads คืนนี้ (ถ้าผิวเริ่มแห้ง)",
+          "Eucerin Aquaporin (buffer ก่อน)",
+          "Glad2Glow Retinol Moisturizer",
+          "ทา Aquaporin ซ้ำถ้าผิวแห้งตึง"
+        ]
+      },
+      2: {
+        label: "Day 2 – Thiamidol Night",
+        type: "thiamidol",
+        steps: [
+          "ล้างหน้า",
+          "LA GLADE Acne Care Daily Calming Pads",
+          "Eucerin Spotless Brightening (Thiamidol)",
+          "Eucerin Aquaporin"
+        ]
+      },
+      3: {
+        label: "Day 3 – Retinol Night",
+        type: "retinol",
+        steps: [
+          "ล้างหน้า",
+          "งด Pads คืนนี้ (ถ้าผิวแห้งง่าย)",
+          "Eucerin Aquaporin (buffer ก่อน)",
+          "Glad2Glow Retinol Moisturizer",
+          "ทา Aquaporin ซ้ำถ้าจำเป็น"
+        ]
+      },
+      4: {
+        label: "Day 4 – Thiamidol + ผ่อนผิว",
+        type: "thiamidol",
+        steps: [
+          "ล้างหน้า",
+          "LA GLADE Acne Care Daily Calming Pads",
+          "Eucerin Spotless Brightening (Thiamidol)",
+          "Eucerin Aquaporin"
+        ]
+      },
+      5: {
+        label: "Day 5 – Retinol Night",
+        type: "retinol",
+        steps: [
+          "ล้างหน้า",
+          "งด Pads คืนนี้ (เลือกได้ตามสภาพผิว)",
+          "Eucerin Aquaporin (buffer ก่อน)",
+          "Glad2Glow Retinol Moisturizer",
+          "ทา Aquaporin ปิดท้าย"
+        ]
+      },
+      6: {
+        label: "Day 6 – Thiamidol Night",
+        type: "thiamidol",
+        steps: [
+          "ล้างหน้า",
+          "LA GLADE Acne Care Daily Calming Pads",
+          "Eucerin Spotless Brightening (Thiamidol)",
+          "Eucerin Aquaporin"
+        ]
+      },
+      7: {
+        label: "Day 7 – Recovery Night",
+        type: "recovery",
+        steps: [
+          "ล้างหน้า",
+          "Eucerin Aquaporin อย่างเดียว (คืนพักผิว)",
+          "งดทุก active: Pads / Niacinamide / Thiamidol / Retinol"
+        ]
+      }
+    };
+
+    var monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    function renderChecklist(listElement, items, dark) {
+      listElement.innerHTML = "";
+      for (var i = 0; i < items.length; i++) {
+        var text = items[i];
+
+        var li = document.createElement("li");
+        li.className =
+          "flex items-start gap-2 rounded-2xl px-2.5 py-1.5 text-[13px] md:text-sm leading-snug transition " +
+          (dark ? "hover:bg-slate-900/50" : "hover:bg-slate-50");
+
+        var checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className =
+          "mt-0.5 w-4 h-4 rounded border border-slate-300 accent-rose-400";
+        checkbox.checked = true; // แสดงว่าเป็น step ของวันนั้น
+
+        var label = document.createElement("span");
+        label.textContent = text;
+
+        li.appendChild(checkbox);
+        li.appendChild(label);
+        listElement.appendChild(li);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      var params = new URLSearchParams(window.location.search);
+
+      var dayParam = parseInt(params.get("day") || "1", 10);
+      if (isNaN(dayParam) || dayParam < 1 || dayParam > 7) {
+        dayParam = 1;
+      }
+
+      var date = parseInt(params.get("date") || "0", 10);
+      var month = parseInt(params.get("month") || "0", 10);
+      var year = parseInt(params.get("year") || "0", 10);
+
+      var today = new Date();
+      if (!date || !month || !year) {
+        date = today.getDate();
+        month = today.getMonth() + 1;
+        year = today.getFullYear();
+      }
+
+      // เซ็ต key สำหรับเซฟว่าเสร็จแล้ว
+      routineDateKey =
+        year + "-" +
+        String(month).padStart(2, "0") + "-" +
+        String(date).padStart(2, "0");
+
+      var routine = nightRoutines[dayParam];
+
+      var routineTitle = document.getElementById("routineTitle");
+      var dateLabel = document.getElementById("dateLabel");
+      var nightTitle = document.getElementById("nightTitle");
+      var chipText = document.getElementById("chipText");
+      var nightNote = document.getElementById("nightNote");
+
+      routineTitle.textContent = "Day " + dayParam + " – Skincare routine";
+      dateLabel.textContent =
+        "สำหรับวันที่ " +
+        date.toString().padStart(2, "0") + " " +
+        monthNames[month - 1] + " " + year;
+
+      nightTitle.textContent = routine.label;
+
+      if (routine.type === "retinol") {
+        chipText.textContent = "Retinol focus • ใช้ 2–3 คืนต่อสัปดาห์";
+        nightNote.textContent =
+          "คืนนี้มีเรตินอล → งด Thiamidol, กรดผลไม้ และสครับทุกชนิด เพื่อไม่ให้ระคายเคืองเกินไป ✨";
+      } else if (routine.type === "thiamidol") {
+        chipText.textContent = "Brightening night • เน้นลดรอยสิว";
+        nightNote.textContent =
+          "คืนนี้ใช้ Thiamidol เพื่อลดรอย → ไม่ต้องใช้เรตินอลหรือ active ตัวอื่นเพิ่มแล้ว เดี๋ยวผิวเหนื่อยเกินไป";
+      } else {
+        chipText.textContent = "Recovery night • พักผิวฟื้น barrier";
+        nightNote.textContent =
+          "คืนนี้เป็นคืนพักผิวล้วน ๆ ใช้มอยส์เจอร์อย่างเดียว ปล่อยให้ barrier ฟื้นตัวเต็มที่ 😴";
+      }
+
+      var morningList = document.getElementById("morningList");
+      var nightList = document.getElementById("nightList");
+
+      renderChecklist(morningList, morningSteps, false);
+      renderChecklist(nightList, routine.steps, true);
+    });
+  </script>
+</body>
+</html>
